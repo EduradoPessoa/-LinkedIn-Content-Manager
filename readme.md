@@ -1,57 +1,194 @@
-# React + TypeScript + Vite
+# LinkedIn Content Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Plataforma web para criação, agendamento e gestão inteligente de conteúdo no LinkedIn com integração de IA.
 
-Currently, two official plugins are available:
+> Status: base funcional de desenvolvimento (auth LinkedIn + JWT, migrations PostgreSQL, API REST e frontend).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📋 Visão Geral
 
-## Expanding the ESLint configuration
+O **LinkedIn Content Manager** é uma aplicação web para simplificar e otimizar a gestão de conteúdo no LinkedIn. Combina automação + IA para ajudar a criar, organizar e acompanhar posts com uma operação leve (projeto solo, custo-otimizado).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🎯 Principais Benefícios
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **Criação inteligente**: geração/reescrita assistida por IA (multi-provedor)
+- **Agendamento flexível**: fila de publicações e execução em horários estratégicos (base pronta; fila avançada planejada)
+- **Gestão multi-conta**: suporte a múltiplos perfis LinkedIn por usuário (estrutura pronta)
+- **Analytics integrado**: armazenamento de métricas e visão histórica (estrutura/migrations prontas; coleta avançada planejada)
+- **UX produtiva**: fluxo simples de login, criação e listagem de posts
+
+## ✨ Funcionalidades
+
+### 📝 Criação de Conteúdo
+
+- Criação e edição de posts
+- Preview e edição rápida no painel
+- Integração IA (stub) com múltiplos provedores (OpenAI, Anthropic, Gemini, Groq)
+
+### ⏰ Agendamento e Publicação
+
+- Criação de agendamentos e listagem (base)
+- Estrutura para fila inteligente e rate limiting (planejado: BullMQ/Redis)
+
+### 🔐 Autenticação e Segurança
+
+- Login via LinkedIn OAuth (SSO)
+- Sessão via **JWT (access token)** + **refresh token em cookie httpOnly**
+- `state` de OAuth validado via cookie
+- Tokens do LinkedIn armazenados **criptografados (AES-256-GCM)** no banco
+
+## 🏗️ Arquitetura
+
+### 🧱 Stack Tecnológica
+
+- **Backend**: Node.js + Express + TypeScript
+- **Frontend**: React + Vite + Tailwind CSS
+- **Database**: PostgreSQL (local)
+- **Redis/Queue**: Redis + BullMQ (planejado)
+- **Deploy**: Docker + Railway/Render (planejado)
+
+### 🧩 Estrutura do Repositório
+
+> Nota: a estrutura atual é um monólito modular com backend em `api/` e frontend na raiz.
+
+```
+.
+├── api/                      # Backend (Express + TypeScript)
+│   ├── modules/              # Módulos de domínio
+│   ├── shared/               # Utilitários comuns (env, errors, crypto, auth)
+│   └── database/             # Migrations e scripts de DB
+├── src/                      # Frontend (React)
+├── .github/workflows/        # CI
+└── .trae/documents/          # Docs (setup, API, arquitetura)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🚀 Instalação e Setup (Desenvolvimento)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Pré-requisitos
 
-export default tseslint.config({
-  extends: [
-    // other configs...
-    // Enable lint rules for React
-    reactX.configs['recommended-typescript'],
-    // Enable lint rules for React DOM
-    reactDom.configs.recommended,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- Node.js 18+
+- pnpm
+- PostgreSQL 14+
+- (Opcional) Redis 6+ (somente quando fila BullMQ for ativada)
+- Conta de desenvolvedor LinkedIn (OAuth)
+
+### Instalação local
+
+```bash
+git clone https://github.com/EduradoPessoa/-LinkedIn-Content-Manager.git
+cd -LinkedIn-Content-Manager
+
+pnpm install
+
+cp .env.example .env
 ```
+
+Edite o `.env` com suas credenciais (nunca commite chaves). Depois:
+
+```bash
+pnpm db:create
+pnpm db:migrate
+
+pnpm dev
+```
+
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:3001`
+- Healthcheck: `http://localhost:3001/api/health`
+
+## ⚙️ Configuração
+
+As variáveis estão em `.env.example`. Principais:
+
+```bash
+# Database
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/linkedin-content-manager
+
+# LinkedIn API
+LINKEDIN_CLIENT_ID=...
+LINKEDIN_CLIENT_SECRET=...
+LINKEDIN_REDIRECT_URI=http://localhost:3001/auth/linkedin/callback
+
+# AI Providers (opcional; endpoints estão em stub)
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+GOOGLE_API_KEY=
+GROQ_API_KEY=
+
+# Security
+JWT_SECRET=
+ENCRYPTION_KEY=
+```
+
+## 📚 API (resumo)
+
+### Health
+
+- `GET /api/health`
+
+### Autenticação
+
+- `GET /auth/linkedin` (gera URL)
+- `GET /auth/linkedin/callback` (callback OAuth)
+- `POST /auth/refresh`
+- `POST /auth/logout`
+- `GET /auth/accounts`
+
+### Posts
+
+- `GET /api/posts`
+- `POST /api/posts`
+- `PUT /api/posts/:id`
+- `DELETE /api/posts/:id`
+
+### Agendamento
+
+- `GET /api/schedule`
+- `POST /api/schedule`
+- `DELETE /api/schedule/:id`
+
+### IA / Analytics
+
+- `POST /api/ai/generate` (stub)
+- `POST /api/ai/improve`
+- `GET /api/analytics/*` (stub)
+
+Documentação detalhada:
+
+- `.trae/documents/API.md`
+- `.trae/documents/SETUP.md`
+- `.trae/documents/ARCHITECTURE.md`
+
+## 🧪 Testes
+
+```bash
+pnpm test
+pnpm test:coverage
+```
+
+## 📦 Deploy
+
+Planejado:
+
+- Docker (compose para API + Postgres + Redis)
+- Railway/Render (custo-otimizado)
+
+## 📋 Roadmap (alto nível)
+
+- v1.0 (MVP): login LinkedIn, CRUD posts, agendamento simples, UI base
+- v1.1: multi-provedor de IA real, analytics avançado, monitoramento de comentários
+- v1.2: templates, integrações adicionais, API pública
+
+## ⚠️ Limitações Conhecidas
+
+- APIs do LinkedIn têm restrições e exigências de aprovação para uso comercial
+- Rate limits variam por endpoint e aplicação (modelagem para fila/rate limiting está planejada)
+
+## 🛡️ Segurança
+
+- Tokens do LinkedIn criptografados no banco
+- JWT + refresh token (cookie httpOnly)
+- Validação de payload com Zod
+
+## 📄 Licença
+
+MIT — veja o arquivo `LICENSE`.

@@ -81,7 +81,7 @@ src/
 └── infrastructure/             # Docker, CI/CD, configs
 ```
 
-##🚀 Instalação e Setup
+## 🚀 Instalação e Setup
 Pré-requisitos
 Node.js 18+
 
@@ -105,7 +105,7 @@ npm run db:migrate
 npm run dev
 ```
 
-##🐳 Com Docker
+## 🐳 Com Docker
 ```bash 
 git clone https://github.com/seu-usuario/linkedin-content-manager.git
 cd linkedin-content-manager
@@ -115,7 +115,7 @@ cp .env.example .env
 docker-compose up -d
 ```
 
-##⚙️ Configuração
+## ⚙️ Configuração
 ```text
 Variáveis de Ambiente
 # Database
@@ -140,7 +140,7 @@ NODE_ENV=development
 PORT=3000
 ```
 
-##📚 API Documentation
+## 📚 API Documentation
 ```text
 Authentication
 POST /auth/linkedin
@@ -176,7 +176,7 @@ docker build -t linkedin-content-manager .
 docker run -p 3000:3000 --env-file .env linkedin-content-manager
 ```
 
-##🤝 Contribuição
+## 🤝 Contribuição
 Fork o projeto
 ```bash
 Crie uma branch (git checkout -b feature/AmazingFeature)
@@ -188,7 +188,7 @@ Push (git push origin feature/AmazingFeature)
 Abra um Pull Request
 ```
 
-##Convenções
+## Convenções
 TypeScript obrigatório
 
 ESLint ativo
@@ -197,7 +197,7 @@ Testes obrigatórios
 
 Cobertura mínima de 80%
 
-##📋 Roadmap
+## 📋 Roadmap
 Versão 1.0 (MVP)
 Autenticação LinkedIn
 
@@ -229,7 +229,7 @@ API pública
 
 Mobile app
 
-##⚠️ Limitações Conhecidas
+## ⚠️ Limitações Conhecidas
 LinkedIn Articles API descontinuada
 
 Rate limit: 250 posts/usuário/dia
@@ -238,7 +238,7 @@ Uso comercial requer aprovação do LinkedIn
 
 Comentários apenas leitura
 
-##🛡️ Segurança
+## 🛡️ Segurança
 Tokens criptografados
 
 JWT + refresh tokens
@@ -249,10 +249,10 @@ Logs de auditoria
 
 HTTPS obrigatório
 
-##📄 Licença
+## 📄 Licença
 Licenciado sob a MIT License — veja o arquivo LICENSE.
 
-##📞 Suporte
+## 📞 Suporte
 Issues: GitHub
 
 Discussões: GitHub
@@ -261,3 +261,4 @@ Email: eduardo@phoenyx.com.br
 
 
 Feito com ❤️ para escalar autoridade e presença no LinkedIn.
+

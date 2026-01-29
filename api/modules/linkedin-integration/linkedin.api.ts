@@ -248,7 +248,17 @@ export class LinkedInApi {
     url.searchParams.set('client_id', env.LINKEDIN_CLIENT_ID)
     url.searchParams.set('redirect_uri', env.LINKEDIN_REDIRECT_URI)
     url.searchParams.set('state', params.state)
-    const scopes = (env.LINKEDIN_SCOPES || 'r_liteprofile').split(/\s+/).map((s) => s.trim()).filter(Boolean)
+    const scopesRaw = (env.LINKEDIN_SCOPES || 'r_liteprofile')
+      .split(/\s+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+
+    const scopes = (
+      env.LINKEDIN_ORG_POSTING_ENABLED
+        ? scopesRaw
+        : scopesRaw.filter((s) => s !== 'w_organization_social' && s !== 'rw_organization_admin' && s !== 'r_organization_admin')
+    ).filter((s, idx, arr) => arr.indexOf(s) === idx)
+
     url.searchParams.set('scope', scopes.join(' '))
     url.searchParams.set('prompt', 'consent')
     return url.toString()

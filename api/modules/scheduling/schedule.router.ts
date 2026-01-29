@@ -39,6 +39,9 @@ scheduleRouter.post(
       userId,
       status: 'scheduled',
       scheduledAt: new Date(body.scheduledAt),
+      publishAttempts: 0,
+      publishLastError: null,
+      publishLockedAt: null,
     })
 
     res.json({ ok: true, post: updated })
@@ -62,9 +65,10 @@ scheduleRouter.delete(
       userId,
       status: 'draft',
       scheduledAt: null,
+      publishLastError: null,
+      publishLockedAt: null,
     })
 
     res.json({ ok: true, post: updated })
   }),
 )
-

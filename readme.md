@@ -107,17 +107,45 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/linkedin-content-mana
 LINKEDIN_CLIENT_ID=...
 LINKEDIN_CLIENT_SECRET=...
 LINKEDIN_REDIRECT_URI=http://localhost:3001/auth/linkedin/callback
+LINKEDIN_SCOPES=openid profile email w_member_social
+LINKEDIN_ORG_POSTING_ENABLED=false
 
-# AI Providers (opcional; endpoints estão em stub)
-OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
+# Alguns endpoints do LinkedIn podem exigir header de versão.
+LINKEDIN_VERSION=202401
+
+# Para publicar no feed (necessário para o botão "Publicar no LinkedIn"):
+# LINKEDIN_SCOPES=openid profile email w_member_social
+
+# AI Providers (opcional)
 GOOGLE_API_KEY=
 GROQ_API_KEY=
+
+# Scheduler (publicação automática)
+SCHEDULER_ENABLED=true
+SCHEDULER_POLL_MS=60000
+SCHEDULER_BATCH_SIZE=5
+SCHEDULER_SECRET=
+
+# Em ambiente local (api/server.ts) o scheduler roda por polling.
+# Em produção na Vercel, um Cron (vercel.json) chama /api/scheduler/tick a cada minuto.
+# Se você definir SCHEDULER_SECRET em produção, o endpoint passa a exigir o secret via header/query.
 
 # Security
 JWT_SECRET=
 ENCRYPTION_KEY=
 ```
+
+Regras:
+
+- `JWT_SECRET` deve ter pelo menos 16 caracteres
+- `ENCRYPTION_KEY` deve ter pelo menos 32 caracteres
+
+Sobre os escopos do LinkedIn:
+
+- Fluxo recomendado: **OpenID Connect** (`LINKEDIN_SCOPES=openid profile email w_member_social`)
+- Escopos legados (ex.: `r_liteprofile`, `r_emailaddress`, `w_member_social`) podem exigir permissões específicas no Developer Portal
+- Para publicar no feed: habilite o produto/permissões de publicação no LinkedIn e inclua `w_member_social` em `LINKEDIN_SCOPES`.
+- Para publicar como **Organização/Página**: inclua `w_organization_social` e a permissão de admin (`rw_organization_admin`) para listar as organizações administradas e validar permissão.
 
 ## 📚 API (resumo)
 
@@ -139,6 +167,7 @@ ENCRYPTION_KEY=
 - `POST /api/posts`
 - `PUT /api/posts/:id`
 - `DELETE /api/posts/:id`
+- `POST /api/posts/:id/publish`
 
 ### Agendamento
 

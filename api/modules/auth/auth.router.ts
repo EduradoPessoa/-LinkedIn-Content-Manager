@@ -48,6 +48,17 @@ authRouter.post(
 authRouter.get(
   '/linkedin/callback',
   asyncHandler(async (req, res) => {
+    const oauthError = typeof req.query.error === 'string' ? req.query.error : null
+    if (oauthError) {
+      const errorDescription = typeof req.query.error_description === 'string' ? req.query.error_description : null
+      const redirectUrl = new URL(env.FRONTEND_URL)
+      redirectUrl.pathname = '/auth/callback'
+      redirectUrl.searchParams.set('error', oauthError)
+      if (errorDescription) redirectUrl.searchParams.set('error_description', errorDescription)
+      res.redirect(302, redirectUrl.toString())
+      return
+    }
+
     const code = z.string().min(1).parse(req.query.code)
     const state = z.string().min(1).parse(req.query.state)
 
@@ -57,16 +68,29 @@ authRouter.get(
     }
 
     const token = await linkedInApi.exchangeCodeForAccessToken(code)
-    const profile = await linkedInApi.getProfile(token.accessToken)
-    const email = await linkedInApi.getEmail(token.accessToken)
 
-    const memberId = profile.id
-    const name = (() => {
+    const scopes = (env.LINKEDIN_SCOPES || '').split(/\s+/).map((s) => s.trim()).filter(Boolean)
+    const isOidc = scopes.includes('openid') || scopes.includes('profile') || scopes.includes('email')
+
+    let memberId: string
+    let name: string | null
+    let email: string | null
+
+    if (isOidc) {
+      const userInfo = await linkedInApi.getUserInfo(token.accessToken)
+      const fullName = (userInfo.name || [userInfo.given_name, userInfo.family_name].filter(Boolean).join(' ')).trim()
+      memberId = userInfo.sub
+      name = fullName.length > 0 ? fullName : null
+      email = userInfo.email ?? null
+    } else {
+      const profile = await linkedInApi.getProfile(token.accessToken)
+      email = await linkedInApi.getEmail(token.accessToken)
+      memberId = profile.id
       const first = Object.values(profile.firstName?.localized ?? {})[0]
       const last = Object.values(profile.lastName?.localized ?? {})[0]
       const full = [first, last].filter(Boolean).join(' ').trim()
-      return full.length > 0 ? full : null
-    })()
+      name = full.length > 0 ? full : null
+    }
 
     let user = await getUserByLinkedInMemberId(memberId)
     if (!user) {

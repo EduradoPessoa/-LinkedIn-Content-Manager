@@ -7,13 +7,18 @@ import { useAuthStore } from '@/stores/authStore'
 export default function Login() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const accessToken = useAuthStore((s) => s.accessToken)
 
   async function startLinkedInLogin() {
     setLoading(true)
+    setError(null)
     try {
-      const resp = await apiFetch<{ ok: true; url: string }>('/auth/linkedin')
+      const resp = await apiFetch<{ ok: true; url: string }>('/api/auth/linkedin')
       window.location.href = resp.url
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Falha ao iniciar login do LinkedIn'
+      setError(message)
     } finally {
       setLoading(false)
     }
@@ -40,6 +45,21 @@ export default function Login() {
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Linkedin className="h-4 w-4" />}
               Entrar com LinkedIn
             </button>
+
+            {error ? (
+              <div className="rounded-lg border border-red-900/40 bg-red-950/40 px-4 py-3 text-xs text-red-200">
+                <div className="font-medium">Não foi possível iniciar o login</div>
+                <div className="mt-1 break-words">{error}</div>
+                <div className="mt-2 text-red-200/80">
+                  Verifique se existe um arquivo <span className="font-mono">.env</span> na raiz (não é
+                  <span className="font-mono"> .env.example</span>), preencha
+                  <span className="font-mono"> LINKEDIN_CLIENT_ID</span>,
+                  <span className="font-mono"> LINKEDIN_CLIENT_SECRET</span> e
+                  <span className="font-mono"> LINKEDIN_REDIRECT_URI</span>, e reinicie o
+                  <span className="font-mono"> pnpm dev</span>.
+                </div>
+              </div>
+            ) : null}
 
             {accessToken ? (
               <button
